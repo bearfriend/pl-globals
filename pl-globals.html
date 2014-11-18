@@ -1,0 +1,123 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<!--
+Element providing solution to no problem in particular.
+
+##### Example
+
+    <pl-globals></pl-globals>
+
+@element pl-globals
+@blurb Element providing solution to no problem in particular.
+@status alpha
+@homepage http://polymerlabs.github.io/pl-globals
+-->
+
+
+<polymer-element name="pl-globals" attributes="author globals override">
+    
+    <template>
+	
+	
+
+    </template>
+
+    <script>
+     (function() {
+	 // these variables are shared by all instances of app-globals
+	 var globals =  {
+	     apiEndpoint: 'localhost:1337'
+	 };
+
+	 var getValue = function(key) {
+	     return this.overrides[key] || this.globals[key];
+	 };
+	 
+	 Polymer({
+	     publish: {
+		 /**
+		  * Set or reset globals.
+		  *
+		  * @attribute globals
+		  * @type object
+		  * @default {}
+		  */
+		 globals: {},
+
+		 /**
+		  * Override globals for this instance of pl-globals
+		  *
+		  * @attribute author
+		  * @type string
+		  * @default 'Daniel Gleckler'
+		  */
+		 override: {}
+	     },
+	     
+	     /**
+	      * The `author` attribute sets an initial author
+	      *
+	      * @attribute author
+	      * @type string
+	      * @default 'Daniel Gleckler'
+	      */
+	     get author() { return 'Daniel Gleckler'; },
+	     
+	     ready: function() {
+
+
+		 // copy new globals into global space
+		 for (var key in this.globals) {
+		     if (this.globals.hasOwnProperty(key)) {
+			 globals[key] = this.globals[key];
+		     }
+		 }
+		 
+		 this.globals = globals;
+
+		 /*
+		 // copy all globals and overrides to instance properties
+		 for (var key in this.globals) {
+		     if (this.globals.hasOwnProperty(key)) {
+			 this[key] = this.globals[key];
+		     }
+		 }
+		 for (var key in this.overrides) {
+		     if (this.overrides.hasOwnProperty(key)) {
+			 this[key] = this.overrides[key];
+		     }
+		 }
+		 */
+	 
+		 for (var key in this.globals) {
+		     if (this.globals.hasOwnProperty(key)) {
+			 Object.setProperty(this, key, {
+			     get: (function(key,that) { 
+				 return function() {
+				     getValue.apply(that,[key]);
+				 };
+			     })(key,this)
+			 });
+		     }
+		 }
+
+		 // TODO: deduplicate this
+		 for (var key in this.overrides) {
+		     if (this.overrides.hasOwnProperty(key)) {
+			 Object.setProperty(this, key, {
+			     get: (function(key,that) { 
+				 return function() {
+				     getValue.apply(that,[key]);
+				 };
+			     })(key,this)
+			 })
+		     }
+		 }
+
+	     }
+	     
+	 });
+     })();
+    </script>
+
+</polymer-element>

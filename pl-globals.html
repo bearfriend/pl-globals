@@ -25,9 +25,7 @@ Element providing solution to no problem in particular.
     <script>
      (function() {
 	 // these variables are shared by all instances of app-globals
-	 var globals =  {
-	     apiEndpoint: 'localhost:1337'
-	 };
+	 var globals =  {};
 
 	 var getValue = function(key) {
 	     return this.overrides[key] || this.globals[key];
@@ -51,7 +49,7 @@ Element providing solution to no problem in particular.
 		  * @type string
 		  * @default 'Daniel Gleckler'
 		  */
-		 override: {}
+		 overrides: {}
 	     },
 	     
 	     /**
@@ -91,10 +89,10 @@ Element providing solution to no problem in particular.
 	 
 		 for (var key in this.globals) {
 		     if (this.globals.hasOwnProperty(key)) {
-			 Object.setProperty(this, key, {
+			 Object.defineProperty(this, key, {
 			     get: (function(key,that) { 
 				 return function() {
-				     getValue.apply(that,[key]);
+				     return getValue.apply(that,[key]);
 				 };
 			     })(key,this)
 			 });
@@ -103,11 +101,11 @@ Element providing solution to no problem in particular.
 
 		 // TODO: deduplicate this
 		 for (var key in this.overrides) {
-		     if (this.overrides.hasOwnProperty(key)) {
-			 Object.setProperty(this, key, {
+		     if (!this.hasOwnProperty(key) && this.overrides.hasOwnProperty(key)) {
+			 Object.defineProperty(this, key, {
 			     get: (function(key,that) { 
 				 return function() {
-				     getValue.apply(that,[key]);
+				     return getValue.apply(that,[key]);
 				 };
 			     })(key,this)
 			 })
